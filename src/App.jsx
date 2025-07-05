@@ -14,7 +14,7 @@ import git from './images/git2.png';
 function App() {
   const [viewCount, setViewCount] = useState(860);
   const [currentTime, setCurrentTime] = useState(0);
-  const maxTime = 288;
+  const maxTime = 155;
   const [isPlaying, setIsPlaying] = useState(false);
   const [showOverlay, setShowOverlay] = useState(true);
   const [isOverlayClicked, setIsOverlayClicked] = useState(false);
@@ -184,8 +184,8 @@ function App() {
             <img src={cover} className='songcover' alt='' />
           </a>
           <div className='songinfo'>
-            <p1 className='songtitle'>alot</p1>
-            <p1 className='artist'>by 21savage</p1>
+            <p1 className='songtitle'>Dark Thoughts</p1>
+            <p1 className='artist'>by Lil Tecca</p1>
             <p1 className='album' href>.-.</p1>
           </div>
           <div className='time-label'>
