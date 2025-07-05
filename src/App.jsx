@@ -22,13 +22,20 @@ function App() {
   const [cssLabel, setCssLabel] = useState('Copy BTC Address');
   const [cssLabel1, setCssLabel1] = useState('Copy LTC Address');
   const [bio, setBio] = useState('');
-  const [entered, setEntered] = useState(false); // State for animation
+  const [entered, setEntered] = useState(false);
+
+  // 3D rotation state
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+
+  // Cursor trail positions
+  const [trail, setTrail] = useState([]);
 
   // Typewriter effect
   const [bioText, setBioText] = useState("made by @raydongg");
   const [index, setIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
 
+  // Typewriter effect logic
   useEffect(() => {
     const timer = setInterval(() => {
       if (isTyping) {
@@ -47,27 +54,18 @@ function App() {
         }
       }
     }, 50);
-
-    return () => clearInterval(timer); // Cleanup the timer
+    return () => clearInterval(timer);
   }, [bioText, index, isTyping]);
 
+  // Fetch view count
   useEffect(() => {
     fetch('/increment-view')
       .then(response => response.json())
       .then(data => setViewCount(data.viewCount))
       .catch(error => console.error('Error:', error));
-
-    // Other side effects...
-
   }, []);
 
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.round(seconds % 60);
-    const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-    return formattedTime;
-  }
-
+  // Audio & timer logic
   useEffect(() => {
     const audioElement = document.getElementById('audio');
 
@@ -91,7 +89,8 @@ function App() {
     };
   }, [isPlaying, isOverlayClicked, maxTime]);
 
-  const handleCopyAddress = (address, label) => {
+  // Copy handlers
+  const handleCopyAddress = (address) => {
     navigator.clipboard.writeText(address)
       .then(() => {
         setCopyStatus('Copied');
@@ -101,10 +100,10 @@ function App() {
           setCssLabel('Copy BTC Address');
         }, 2000);
       })
-      .catch(error => console.error('Error copying address to clipboard:', error));
+      .catch(error => console.error('Error copying address:', error));
   };
-  
-  const handleCopyAddress1 = (address, label) => {
+
+  const handleCopyAddress1 = (address) => {
     navigator.clipboard.writeText(address)
       .then(() => {
         setCopyStatus('Copied');
@@ -114,11 +113,11 @@ function App() {
           setCssLabel1('Copy LTC Address');
         }, 2000);
       })
-      .catch(error => console.error('Error copying address to clipboard:', error));
+      .catch(error => console.error('Error copying address:', error));
   };
-  
+
   function audioPlay() {
-    var audio = document.getElementById('audio');
+    const audio = document.getElementById('audio');
     audio.volume = 1;
     audio.play();
   }
@@ -137,27 +136,87 @@ function App() {
     setShowOverlay(false);
     setIsOverlayClicked(true);
     audioPlay();
-    setEntered(true); // Trigger the animation
+    setEntered(true);
   };
 
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.round(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  }
+
+  // 3D rotation based on mouse position
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const rotateX = ((e.clientY - centerY) / centerY) * 10; // max 10deg
+      const rotateY = ((e.clientX - centerX) / centerX) * 10; // max 10deg
+      setRotation({ x: rotateX, y: rotateY });
+
+      // Update trail positions
+      setTrail(trail => {
+        const newTrail = [...trail, { x: e.clientX, y: e.clientY, id: Date.now() }];
+        // Limit trail length to 15 dots
+        if (newTrail.length > 15) newTrail.shift();
+        return newTrail;
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
-    <div className='app-container'>
+    <div className='app-container' style={{ cursor: 'none' }}>
       <video autoPlay loop muted className='video-background'>
         <source src={bg} type='video/mp4' />
         Your browser does not support the video tag.
       </video>
+
+      {/* Cursor trail dots */}
+      {trail.map(dot => (
+        <div
+          key={dot.id}
+          className="cursor-trail-dot"
+          style={{
+            left: dot.x - 5,
+            top: dot.y - 5,
+            position: 'fixed',
+            width: 10,
+            height: 10,
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            pointerEvents: 'none',
+            mixBlendMode: 'difference',
+            opacity: 0.4,
+            transition: 'opacity 0.3s',
+            zIndex: 9999,
+          }}
+        />
+      ))}
+
       {showOverlay && (
         <div className='overlay' onClick={handleOverlayClick}>
           <p1 className='click'>Click Anywhere</p1>
         </div>
       )}
-      <div className={`main-container ${entered ? 'entered' : ''}`}>
+
+      <div
+        className={`main-container ${entered ? 'entered' : ''}`}
+        style={{
+          transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transition: 'transform 0.1s ease-out',
+          willChange: 'transform',
+          perspective: '800px',
+        }}
+      >
         <img src={view} className='view' alt="View Icon" />
         <p1 className='num'>{viewCount}</p1>
         <img src={pfp} className='pfp' alt="Profile Picture" />
         <div className='info' >
           <h1 className='name'>raydon</h1>
-          <h1 className='bio'>{bio}</h1> {/* Bio with typewriter effect */}
+          <h1 className='bio'>{bio}</h1>
         </div>
         <div className='links'>
           <a href="" target="_blank" rel="noopener noreferrer">
