@@ -2,12 +2,22 @@
     background-color: #232323;
 }
 
+body {
+    cursor: url('/custom.png'), auto;
+}
+
+button, a, .pfp, .overlay, .song, .button1, .button2, .links img {
+    cursor: url('/custom.png'), auto;
+}
+
+/* 3D main container */
 .main-container {
     opacity: 0;
     position: fixed;
     left: 50%;
     top: 40%;
     transform: translate(-50%, -50%);
+    transform-style: preserve-3d;
     background-color: rgba(98, 98, 98, 0.4);
     padding: 90px;
     width: 350px;
@@ -18,6 +28,7 @@
     align-items: center;
     border: 2px solid white;
     backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, background-color 0.5s ease-in-out;
 }
 
@@ -25,6 +36,11 @@
     opacity: 1;
 }
 
+.main-container:hover {
+    transform: translate(-50%, -50%) rotateX(5deg) rotateY(-5deg);
+}
+
+/* Profile */
 .container {
     display: flex;
     align-items: center;
@@ -40,23 +56,16 @@
     transform: translateX(120px);
     top: 15px;
     border: 2px solid black;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-body {
-    cursor: url('/custom.png'), auto;
+.pfp:hover {
+    transform: scale(1.1) translateZ(20px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.6);
+    z-index: 10;
 }
 
-button,
-a,
-.pfp,
-.overlay,
-.song,
-.button1,
-.button2,
-.links img {
-    cursor: url('/custom.png'), auto;
-}
-
+/* Name */
 .name {
     margin-left: 10px;
     font-weight: bold;
@@ -86,6 +95,7 @@ a,
     font-family: 'Noto Sans', sans-serif;
 }
 
+/* Views */
 .outside {
     display: flex;
     align-items: center;
@@ -130,6 +140,7 @@ a,
     top: 21px;
 }
 
+/* Bio */
 .bio {
     margin-left: 10px;
     position: fixed;
@@ -141,8 +152,9 @@ a,
     font-family: Roboto, sans-serif;
 }
 
+/* Links container */
 .links {
-    gap: .75rem;
+    gap: 0.75rem;
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
@@ -157,21 +169,26 @@ a,
     align-items: center;
 }
 
+/* Link icons */
 .link1, .link2, .link3, .link4, .link5 {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid white;
+    transition: all 0.3s ease;
 }
 
-.link1:hover, .link2:hover, .link3:hover, .link4:hover, .link5:hover {
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 20px rgba(255, 255, 255, 0.6),
-                0 0 30px rgba(255, 255, 255, 0.4);
-    scale: 1.05;
+.links:hover .link1,
+.links:hover .link2,
+.links:hover .link3,
+.links:hover .link4,
+.links:hover .link5 {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
 }
 
+/* Dividers */
 .div1, .div2 {
     position: fixed;
     left: 50%;
@@ -184,19 +201,14 @@ a,
     justify-content: space-between;
     align-items: center;
 }
+.div1 { top: 276px; }
+.div2 { top: 450px; }
 
-.div1 {
-    top: 276px;
-}
-
-.div2 {
-    top: 450px;
-}
-
+/* Buttons */
 .button1, .button2 {
     color: white;
-    text-align: center;
     text-decoration: none;
+    text-align: center;
     position: fixed;
     left: 6%;
     background-color: #00000000;
@@ -212,40 +224,30 @@ a,
     text-decoration: bold;
 }
 
-.button1 {
-    top: 464px;
-}
+.button1 { top: 464px; }
+.button2 { top: 525px; }
 
-.button2 {
-    top: 525px;
-}
-
-.button1:hover::before, .button2:hover::before {
+.button1:hover::before,
+.button2:hover::before {
     content: attr(data-label);
     position: absolute;
     background-color: #0a0a0a;
     color: #ffffff;
     padding: 5px;
     border-radius: 5px;
+    top: 30px;
+    left: 38%;
+    transform: translateX(-10%);
     font-size: 14px;
     white-space: nowrap;
     width: 130px;
     text-align: center;
     font-family: 'Noto Sans', sans-serif;
+    opacity: 1;
+    transition: all 0.3s ease;
 }
 
-.button1:hover::before {
-    top: 30px;
-    left: 38%;
-    transform: translateX(-10%);
-}
-
-.button2:hover::before {
-    top: 33px;
-    left: 38%;
-    transform: translateX(-10%);
-}
-
+/* Video */
 .video-background {
     position: fixed;
     top: 0;
@@ -256,6 +258,7 @@ a,
     z-index: -1;
 }
 
+/* Song Info */
 .song {
     position: fixed;
     left: 50%;
@@ -279,6 +282,12 @@ a,
     position: fixed;
     left: 20px;
     border-radius: 10px;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.songcover:hover {
+    transform: rotateY(8deg) scale(1.05);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
 }
 
 .songinfo {
@@ -297,6 +306,7 @@ a,
     transform: translateY(-30px);
 }
 
+/* Progress bar */
 .progress-bar-container {
     border-radius: 10px;
     height: 10px;
@@ -317,6 +327,7 @@ a,
     border-radius: 10px;
 }
 
+/* Time label */
 .time-label {
     margin-top: 20px;
     font-size: 14px;
@@ -325,6 +336,7 @@ a,
     transform: translateX(50px);
 }
 
+/* Overlay */
 .overlay {
     background: black;
     position: fixed;
@@ -353,6 +365,7 @@ a,
     left: 15%;
 }
 
+/* Tooltip */
 .tooltip {
     display: none;
     position: absolute;
