@@ -23,19 +23,13 @@ function App() {
   const [cssLabel1, setCssLabel1] = useState('Copy LTC Address');
   const [bio, setBio] = useState('');
   const [entered, setEntered] = useState(false);
-
-  // 3D rotation state
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
 
-  // Cursor trail positions
-  const [trail, setTrail] = useState([]);
-
-  // Typewriter effect
   const [bioText, setBioText] = useState("made by @raydongg");
   const [index, setIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
+  const [trail, setTrail] = useState([]);
 
-  // Typewriter effect logic
   useEffect(() => {
     const timer = setInterval(() => {
       if (isTyping) {
@@ -57,15 +51,19 @@ function App() {
     return () => clearInterval(timer);
   }, [bioText, index, isTyping]);
 
-  // Fetch view count
   useEffect(() => {
     fetch('/increment-view')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => setViewCount(data.viewCount))
-      .catch(error => console.error('Error:', error));
+      .catch(err => console.error(err));
   }, []);
 
-  // Audio & timer logic
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.round(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  }
+
   useEffect(() => {
     const audioElement = document.getElementById('audio');
 
@@ -75,45 +73,48 @@ function App() {
     }
 
     const interval = setInterval(() => {
-      const elapsedTime = Math.round(audioElement.currentTime);
-      setCurrentTime(elapsedTime);
+      if (audioElement) {
+        const elapsedTime = Math.round(audioElement.currentTime);
+        setCurrentTime(elapsedTime);
 
-      if (elapsedTime >= maxTime) {
-        audioElement.currentTime = 0;
-        setCurrentTime(0);
+        if (elapsedTime >= maxTime) {
+          audioElement.currentTime = 0;
+          setCurrentTime(0);
+        }
       }
     }, 1000);
 
-    return () => {
-      clearInterval(interval);
+    return () => clearInterval(interval);
+  }, [isPlaying, isOverlayClicked]);
+
+  useEffect(() => {
+    const handleMouseMove = e => {
+      const newTrail = [...trail, { x: e.clientX, y: e.clientY, id: Date.now() }];
+      setTrail(newTrail.slice(-20)); // keep last 20 dots
+
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+      const tiltX = (dy / centerY) * 10;
+      const tiltY = -(dx / centerX) * 10;
+
+      setRotation({ x: tiltX, y: tiltY });
     };
-  }, [isPlaying, isOverlayClicked, maxTime]);
 
-  // Copy handlers
-  const handleCopyAddress = (address) => {
-    navigator.clipboard.writeText(address)
-      .then(() => {
-        setCopyStatus('Copied');
-        setCssLabel('Copied');
-        setTimeout(() => {
-          setCopyStatus('');
-          setCssLabel('Copy BTC Address');
-        }, 2000);
-      })
-      .catch(error => console.error('Error copying address:', error));
-  };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [trail]);
 
-  const handleCopyAddress1 = (address) => {
-    navigator.clipboard.writeText(address)
-      .then(() => {
-        setCopyStatus('Copied');
-        setCssLabel1('Copied');
-        setTimeout(() => {
-          setCopyStatus('');
-          setCssLabel1('Copy LTC Address');
-        }, 2000);
-      })
-      .catch(error => console.error('Error copying address:', error));
+  const handleCopyAddress = (address, labelSetter) => {
+    navigator.clipboard.writeText(address).then(() => {
+      setCopyStatus('Copied');
+      labelSetter('Copied');
+      setTimeout(() => {
+        setCopyStatus('');
+        labelSetter(labelSetter === setCssLabel ? 'Copy BTC Address' : 'Copy LTC Address');
+      }, 2000);
+    });
   };
 
   function audioPlay() {
@@ -122,16 +123,6 @@ function App() {
     audio.play();
   }
 
-  const handlePlayPause = () => {
-    const audioElement = document.getElementById('audio');
-    if (isPlaying) {
-      audioElement.pause();
-    } else {
-      audioElement.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   const handleOverlayClick = () => {
     setShowOverlay(false);
     setIsOverlayClicked(true);
@@ -139,120 +130,65 @@ function App() {
     setEntered(true);
   };
 
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.round(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  }
-
-  // 3D rotation based on mouse position
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      const rotateX = ((e.clientY - centerY) / centerY) * 10; // max 10deg
-      const rotateY = ((e.clientX - centerX) / centerX) * 10; // max 10deg
-      setRotation({ x: rotateX, y: rotateY });
-
-      // Update trail positions
-      setTrail(trail => {
-        const newTrail = [...trail, { x: e.clientX, y: e.clientY, id: Date.now() }];
-        // Limit trail length to 15 dots
-        if (newTrail.length > 15) newTrail.shift();
-        return newTrail;
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
-    <div className='app-container' style={{ cursor: 'none' }}>
-      <video autoPlay loop muted className='video-background'>
-        <source src={bg} type='video/mp4' />
+    <div className="app-container">
+      <video autoPlay loop muted className="video-background">
+        <source src={bg} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Cursor trail dots */}
-      {trail.map(dot => (
-        <div
-          key={dot.id}
-          className="cursor-trail-dot"
-          style={{
-            left: dot.x - 5,
-            top: dot.y - 5,
-            position: 'fixed',
-            width: 10,
-            height: 10,
-            borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            pointerEvents: 'none',
-            mixBlendMode: 'difference',
-            opacity: 0.4,
-            transition: 'opacity 0.3s',
-            zIndex: 9999,
-          }}
-        />
-      ))}
-
       {showOverlay && (
-        <div className='overlay' onClick={handleOverlayClick}>
-          <p1 className='click'>Click Anywhere</p1>
+        <div className="overlay" onClick={handleOverlayClick}>
+          <p1 className="click">Click Anywhere</p1>
         </div>
       )}
 
       <div
         className={`main-container ${entered ? 'entered' : ''}`}
         style={{
-          transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-          transition: 'transform 0.1s ease-out',
-          willChange: 'transform',
-          perspective: '800px',
+          transform: `translate(-50%, -50%) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          top: '50%',
+          left: '50%',
+          position: 'absolute',
         }}
       >
-        <img src={view} className='view' alt="View Icon" />
-        <p1 className='num'>{viewCount}</p1>
-        <img src={pfp} className='pfp' alt="Profile Picture" />
-        <div className='info' >
-          <h1 className='name'>raydon</h1>
-          <h1 className='bio'>{bio}</h1>
+        <img src={view} className="view" alt="View Icon" />
+        <p1 className="num">{viewCount}</p1>
+        <img src={pfp} className="pfp" alt="Profile" />
+        <div className="info">
+          <h1 className="name">raydon</h1>
+          <h1 className="bio">{bio}</h1>
         </div>
-        <div className='links'>
-          <a href="" target="_blank" rel="noopener noreferrer">
-            <img src={twitter} className='link1' alt="Twitter" />
-          </a>
-          <a href="" target="_blank" rel="noopener noreferrer">
-            <img src={git} className='link2' alt="GitHub" />
-          </a>
-          <a href="https://www.instagram.com/dangerincord/" target="_blank" rel="noopener noreferrer">
-            <img src={insta} className='link3' alt="Instagram" />
-          </a>
-          <a href="https://www.youtube.com/channel/raydongg" target="_blank" rel="noopener noreferrer">
-            <img src={yt} className='link4' alt="YouTube" />
-          </a>
-          <a href="https://discord.com/users/raydongg" target="_blank" rel="noopener noreferrer">
-            <img src={discord} className='link5' alt="Discord" />
-          </a>
+        <div className="links">
+          <a href="#"><img src={twitter} className="link1" alt="X" /></a>
+          <a href="#"><img src={git} className="link2" alt="Git" /></a>
+          <a href="https://www.instagram.com/dangerincord/" target="_blank"><img src={insta} className="link3" alt="Insta" /></a>
+          <a href="https://www.youtube.com/channel/raydongg" target="_blank"><img src={yt} className="link4" alt="YT" /></a>
+          <a href="https://discord.com/users/raydongg" target="_blank"><img src={discord} className="link5" alt="Discord" /></a>
         </div>
-        <div className='song'>
-          <div className='progress-bar-container'>
-            <div className='progress-bar' style={{ width: `${(currentTime / maxTime) * 100}%` }} />
+        <div className="song">
+          <div className="progress-bar-container">
+            <div className="progress-bar" style={{ width: `${(currentTime / maxTime) * 100}%` }} />
           </div>
-          <a href='' target='_blank' rel='noopener noreferrer'>
-            <img src={cover} className='songcover' alt='' />
-          </a>
-          <div className='songinfo'>
-            <p1 className='songtitle'>alot</p1>
-            <p1 className='artist'>by 21savage</p1>
-            <p1 className='album' href>.-.</p1>
+          <img src={cover} className="songcover" alt="Cover" />
+          <div className="songinfo">
+            <p1 className="songtitle">alot</p1>
+            <p1 className="artist">by 21savage</p1>
           </div>
-          <div className='time-label'>
+          <div className="time-label">
             {formatTime(currentTime)} / {formatTime(maxTime)}
           </div>
-          <audio id='audio' src={stop} />
+          <audio id="audio" src={stop}></audio>
         </div>
       </div>
+
+      {trail.map(dot => (
+        <div
+          key={dot.id}
+          className="cursor-trail"
+          style={{ left: dot.x + 'px', top: dot.y + 'px' }}
+        />
+      ))}
     </div>
   );
 }
