@@ -22,11 +22,12 @@ function App() {
   const [cssLabel, setCssLabel] = useState('Copy BTC Address');
   const [cssLabel1, setCssLabel1] = useState('Copy LTC Address');
   const [bio, setBio] = useState('');
-  const [entered, setEntered] = useState(false); // State for animation
+  const [entered, setEntered] = useState(false);
 
-  // Ref for main-container to apply 3D tilt
+  // Magnetic 3D tilt refs and constants
   const containerRef = useRef(null);
-  const maxRotate = 15; // max degrees of tilt
+  const animationFrameId = useRef(null);
+  const maxRotate = 15;
 
   // Typewriter effect
   const [bioText, setBioText] = useState("made by @raydongg");
@@ -52,7 +53,7 @@ function App() {
       }
     }, 50);
 
-    return () => clearInterval(timer); // Cleanup the timer
+    return () => clearInterval(timer);
   }, [bioText, index, isTyping]);
 
   useEffect(() => {
@@ -86,11 +87,48 @@ function App() {
       }
     }, 1000);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [isPlaying, isOverlayClicked, maxTime]);
 
+  // Magnetic 3D tilt effect handlers
+  const onMouseMove = (e) => {
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+    }
+    animationFrameId.current = requestAnimationFrame(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const deltaX = e.clientX - centerX;
+      const deltaY = e.clientY - centerY;
+
+      // Normalize cursor position from -1 to 1
+      const normalizedX = deltaX / (rect.width / 2);
+      const normalizedY = deltaY / (rect.height / 2);
+
+      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+      const rotateX = clamp(-normalizedY, -1, 1) * maxRotate;
+      const rotateY = clamp(normalizedX, -1, 1) * maxRotate;
+
+      container.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+  };
+
+  const onMouseLeave = () => {
+    if (animationFrameId.current) {
+      cancelAnimationFrame(animationFrameId.current);
+    }
+    const container = containerRef.current;
+    if (!container) return;
+    container.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
+  };
+
+  // Copy address handlers (kept unchanged)
   const handleCopyAddress = (address, label) => {
     navigator.clipboard.writeText(address)
       .then(() => {
@@ -101,7 +139,7 @@ function App() {
           setCssLabel('Copy BTC Address');
         }, 2000);
       })
-      .catch(error => console.error('Error copying address to clipboard:', error));
+      .catch(console.error);
   };
 
   const handleCopyAddress1 = (address, label) => {
@@ -114,11 +152,11 @@ function App() {
           setCssLabel1('Copy LTC Address');
         }, 2000);
       })
-      .catch(error => console.error('Error copying address to clipboard:', error));
+      .catch(console.error);
   };
 
   function audioPlay() {
-    var audio = document.getElementById('audio');
+    const audio = document.getElementById('audio');
     audio.volume = 1;
     audio.play();
   }
@@ -137,36 +175,7 @@ function App() {
     setShowOverlay(false);
     setIsOverlayClicked(true);
     audioPlay();
-    setEntered(true); // Trigger the animation
-  };
-
-  // --- Magnetic 3D hover handlers ---
-  const handleMouseMove = (e) => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const deltaX = e.clientX - centerX;
-    const deltaY = e.clientY - centerY;
-
-    const normalizedX = deltaX / (rect.width / 2);
-    const normalizedY = deltaY / (rect.height / 2);
-
-    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-    const rotateX = clamp(-normalizedY, -1, 1) * maxRotate;
-    const rotateY = clamp(normalizedX, -1, 1) * maxRotate;
-
-    container.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  };
-
-  const handleMouseLeave = () => {
-    const container = containerRef.current;
-    if (!container) return;
-    container.style.transform = `perspective(600px) rotateX(0deg) rotateY(0deg)`;
+    setEntered(true);
   };
 
   return (
@@ -183,15 +192,15 @@ function App() {
       <div
         ref={containerRef}
         className={`main-container ${entered ? 'entered' : ''}`}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
       >
         <img src={view} className='view' alt="View Icon" />
         <p1 className='num'>{viewCount}</p1>
         <img src={pfp} className='pfp' alt="Profile Picture" />
-        <div className='info' >
+        <div className='info'>
           <h1 className='name'>raydon</h1>
-          <h1 className='bio'>{bio}</h1> {/* Bio with typewriter effect */}
+          <h1 className='bio'>{bio}</h1>
         </div>
         <div className='links'>
           <a href="" target="_blank" rel="noopener noreferrer">
