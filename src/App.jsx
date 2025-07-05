@@ -177,22 +177,28 @@ function App() {
           </a>
         </div>
         <div className='song'>
-          <div className='progress-bar-container'>
-            <div className='progress-bar' style={{ width: `${(currentTime / maxTime) * 100}%` }} />
-          </div>
-          <a href='' target='_blank' rel='noopener noreferrer'>
-            <img src={cover} className='songcover' alt='' />
-          </a>
-          <div className='songinfo'>
-            <p1 className='songtitle'>Dark Thoughts</p1>
-            <p1 className='artist'>by Lil Tecca</p1>
-            <p1 className='album' href>♡</p1>
-          </div>
-          <div className='time-label'>
-            {formatTime(currentTime)} / {formatTime(maxTime)}
-          </div>
-          <audio id='audio' src={stop} />
-        </div>
+  <div className='progress-bar-container'>
+    <div className='progress-bar' style={{ width: `${(currentTime / maxTime) * 100}%` }} />
+  </div>
+  <a href='' target='_blank' rel='noopener noreferrer'>
+    <img src={cover} className='songcover' alt='' />
+  </a>
+  <div className='songinfo'>
+    <p1 className='songtitle'>Dark Thoughts</p1>
+    <p1 className='artist'>by Lil Tecca</p1>
+    <p1 className='album' href>♡</p1>
+  </div>
+  <div className='time-label'>
+    {formatTime(currentTime)} / {formatTime(maxTime)}
+  </div>
+
+  {/* Play/Pause Button */}
+  <button onClick={handlePlayPause} className='play-pause-button' aria-label={isPlaying ? "Pause" : "Play"}>
+    {isPlaying ? '⏸️' : '▶️'}
+  </button>
+
+  <audio id='audio' src={stop} />
+</div>
       </div>
     </div>
   );
