@@ -176,7 +176,6 @@ function App() {
             <img src={discord} className='link5' alt="Discord" />
           </a>
         </div>
-        <div className='div1'></div>
         <div className='song'>
           <div className='progress-bar-container'>
             <div className='progress-bar' style={{ width: `${(currentTime / maxTime) * 100}%` }} />
@@ -194,21 +193,6 @@ function App() {
           </div>
           <audio id='audio' src={stop} />
         </div>
-        <div className='div2'></div>
-        <button
-          className='button2'
-          onClick={() => handleCopyAddress1('ltc1qjs96zx9vr4ha7ylyrnydg4g0cvla6m9aj73fpz', 'LTC Address')}
-          data-label={cssLabel1}
-        >
-          LTC
-        </button>
-        <button
-          className='button1'
-          onClick={() => handleCopyAddress('bc1q8l6pdlcxh0rj0zsud89qn83rw7scc5s48zndca', 'BTC Address')}
-          data-label={cssLabel}
-        >
-          BTC
-        </button>
       </div>
     </div>
   );
