@@ -186,7 +186,7 @@ function App() {
           <div className='songinfo'>
             <p1 className='songtitle'>Dark Thoughts</p1>
             <p1 className='artist'>by Lil Tecca</p1>
-            <p1 className='album' href>.-.</p1>
+            <p1 className='album' href>♡</p1>
           </div>
           <div className='time-label'>
             {formatTime(currentTime)} / {formatTime(maxTime)}
