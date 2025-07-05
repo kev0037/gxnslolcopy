@@ -181,7 +181,7 @@ function App() {
           <div className='progress-bar-container'>
             <div className='progress-bar' style={{ width: `${(currentTime / maxTime) * 100}%` }} />
           </div>
-          <a href='https://soundcloud.com/trapdailysounds/glokk40spaz-sg-lul-ki-stop-playin-prod-by-khroam' target='_blank' rel='noopener noreferrer'>
+          <a href='' target='_blank' rel='noopener noreferrer'>
             <img src={cover} className='songcover' alt='' />
           </a>
           <div className='songinfo'>
