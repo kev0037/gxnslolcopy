@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import pfp from './images/pfp1.gif';
 import view from './images/viewW.svg';
@@ -22,12 +22,7 @@ function App() {
   const [cssLabel, setCssLabel] = useState('Copy BTC Address');
   const [cssLabel1, setCssLabel1] = useState('Copy LTC Address');
   const [bio, setBio] = useState('');
-  const [entered, setEntered] = useState(false);
-
-  // Magnetic 3D tilt refs and constants
-  const containerRef = useRef(null);
-  const animationFrameId = useRef(null);
-  const maxRotate = 15;
+  const [entered, setEntered] = useState(false); // State for animation
 
   // Typewriter effect
   const [bioText, setBioText] = useState("made by @raydongg");
@@ -53,7 +48,7 @@ function App() {
       }
     }, 50);
 
-    return () => clearInterval(timer);
+    return () => clearInterval(timer); // Cleanup the timer
   }, [bioText, index, isTyping]);
 
   useEffect(() => {
@@ -61,12 +56,16 @@ function App() {
       .then(response => response.json())
       .then(data => setViewCount(data.viewCount))
       .catch(error => console.error('Error:', error));
+
+    // Other side effects...
+
   }, []);
 
   function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.round(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    return formattedTime;
   }
 
   useEffect(() => {
@@ -87,48 +86,11 @@ function App() {
       }
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [isPlaying, isOverlayClicked, maxTime]);
 
-  // Magnetic 3D tilt effect handlers
-  const onMouseMove = (e) => {
-    if (animationFrameId.current) {
-      cancelAnimationFrame(animationFrameId.current);
-    }
-    animationFrameId.current = requestAnimationFrame(() => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      const deltaX = e.clientX - centerX;
-      const deltaY = e.clientY - centerY;
-
-      // Normalize cursor position from -1 to 1
-      const normalizedX = deltaX / (rect.width / 2);
-      const normalizedY = deltaY / (rect.height / 2);
-
-      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-      const rotateX = clamp(-normalizedY, -1, 1) * maxRotate;
-      const rotateY = clamp(normalizedX, -1, 1) * maxRotate;
-
-      container.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    });
-  };
-
-  const onMouseLeave = () => {
-    if (animationFrameId.current) {
-      cancelAnimationFrame(animationFrameId.current);
-    }
-    const container = containerRef.current;
-    if (!container) return;
-    container.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg)';
-  };
-
-  // Copy address handlers (kept unchanged)
   const handleCopyAddress = (address, label) => {
     navigator.clipboard.writeText(address)
       .then(() => {
@@ -139,9 +101,9 @@ function App() {
           setCssLabel('Copy BTC Address');
         }, 2000);
       })
-      .catch(console.error);
+      .catch(error => console.error('Error copying address to clipboard:', error));
   };
-
+  
   const handleCopyAddress1 = (address, label) => {
     navigator.clipboard.writeText(address)
       .then(() => {
@@ -152,11 +114,11 @@ function App() {
           setCssLabel1('Copy LTC Address');
         }, 2000);
       })
-      .catch(console.error);
+      .catch(error => console.error('Error copying address to clipboard:', error));
   };
-
+  
   function audioPlay() {
-    const audio = document.getElementById('audio');
+    var audio = document.getElementById('audio');
     audio.volume = 1;
     audio.play();
   }
@@ -175,7 +137,7 @@ function App() {
     setShowOverlay(false);
     setIsOverlayClicked(true);
     audioPlay();
-    setEntered(true);
+    setEntered(true); // Trigger the animation
   };
 
   return (
@@ -189,18 +151,13 @@ function App() {
           <p1 className='click'>Click Anywhere</p1>
         </div>
       )}
-      <div
-        ref={containerRef}
-        className={`main-container ${entered ? 'entered' : ''}`}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-      >
+      <div className={`main-container ${entered ? 'entered' : ''}`}>
         <img src={view} className='view' alt="View Icon" />
         <p1 className='num'>{viewCount}</p1>
         <img src={pfp} className='pfp' alt="Profile Picture" />
-        <div className='info'>
+        <div className='info' >
           <h1 className='name'>raydon</h1>
-          <h1 className='bio'>{bio}</h1>
+          <h1 className='bio'>{bio}</h1> {/* Bio with typewriter effect */}
         </div>
         <div className='links'>
           <a href="" target="_blank" rel="noopener noreferrer">
