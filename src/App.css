@@ -52,7 +52,7 @@
     } 
     /* Apply globally */
     body {
-      cursor: url('/custom.cur'), auto;
+      cursor: url('/custom.png'), auto;
     }
 
     /* Optional: Also apply to buttons, links, etc. */
@@ -64,7 +64,7 @@
     .button1,
     .button2,
     .links img {
-      cursor: url('/custom.cur'), auto;
+      cursor: url('/custom.png'), auto;
     }
 
     .name {
