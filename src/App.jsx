@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import pfp from './images/pfp1.gif';
 import view from './images/viewW.svg';
@@ -23,6 +23,10 @@ function App() {
   const [cssLabel1, setCssLabel1] = useState('Copy LTC Address');
   const [bio, setBio] = useState('');
   const [entered, setEntered] = useState(false); // State for animation
+
+  // Ref for main-container to apply 3D tilt
+  const containerRef = useRef(null);
+  const maxRotate = 15; // max degrees of tilt
 
   // Typewriter effect
   const [bioText, setBioText] = useState("made by @raydongg");
@@ -56,16 +60,12 @@ function App() {
       .then(response => response.json())
       .then(data => setViewCount(data.viewCount))
       .catch(error => console.error('Error:', error));
-
-    // Other side effects...
-
   }, []);
 
   function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.round(seconds % 60);
-    const formattedTime = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-    return formattedTime;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   }
 
   useEffect(() => {
@@ -103,7 +103,7 @@ function App() {
       })
       .catch(error => console.error('Error copying address to clipboard:', error));
   };
-  
+
   const handleCopyAddress1 = (address, label) => {
     navigator.clipboard.writeText(address)
       .then(() => {
@@ -116,7 +116,7 @@ function App() {
       })
       .catch(error => console.error('Error copying address to clipboard:', error));
   };
-  
+
   function audioPlay() {
     var audio = document.getElementById('audio');
     audio.volume = 1;
@@ -140,6 +140,35 @@ function App() {
     setEntered(true); // Trigger the animation
   };
 
+  // --- Magnetic 3D hover handlers ---
+  const handleMouseMove = (e) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const deltaX = e.clientX - centerX;
+    const deltaY = e.clientY - centerY;
+
+    const normalizedX = deltaX / (rect.width / 2);
+    const normalizedY = deltaY / (rect.height / 2);
+
+    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+    const rotateX = clamp(-normalizedY, -1, 1) * maxRotate;
+    const rotateY = clamp(normalizedX, -1, 1) * maxRotate;
+
+    container.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  };
+
+  const handleMouseLeave = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.style.transform = `perspective(600px) rotateX(0deg) rotateY(0deg)`;
+  };
+
   return (
     <div className='app-container'>
       <video autoPlay loop muted className='video-background'>
@@ -151,7 +180,12 @@ function App() {
           <p1 className='click'>Click Anywhere</p1>
         </div>
       )}
-      <div className={`main-container ${entered ? 'entered' : ''}`}>
+      <div
+        ref={containerRef}
+        className={`main-container ${entered ? 'entered' : ''}`}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
         <img src={view} className='view' alt="View Icon" />
         <p1 className='num'>{viewCount}</p1>
         <img src={pfp} className='pfp' alt="Profile Picture" />
