@@ -51,18 +51,6 @@
         border: 2px solid black;
     } 
 
-    body {
-      cursor: crosshair;
-    }
-
-    .links a img {
-          cursor: pointer;
-    }
-
-    .overlay {
-          cursor: crosshair;
-    }
-
     .name {
         margin-left: 10px;
         font-weight: bold;
