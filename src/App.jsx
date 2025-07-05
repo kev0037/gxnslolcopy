@@ -191,12 +191,6 @@ function App() {
   <div className='time-label'>
     {formatTime(currentTime)} / {formatTime(maxTime)}
   </div>
-
-  {/* Play/Pause Button */}
-  <button onClick={handlePlayPause} className='play-pause-button' aria-label={isPlaying ? "Pause" : "Play"}>
-    {isPlaying ? '⏸️' : '▶️'}
-  </button>
-
   <audio id='audio' src={stop} />
 </div>
       </div>
