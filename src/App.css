@@ -57,7 +57,7 @@ body, html, #root {
 .main-container {
   position: fixed;
   left: 50%;
-  top: 40%;
+  top: 50%;
   width: 380px;
   height: 420px;
   background: rgba(98, 98, 98, 0.4);
