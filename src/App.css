@@ -50,6 +50,22 @@
         top: 15px;
         border: 2px solid black;
     } 
+    /* Apply globally */
+    body {
+      cursor: url('/custom.cur'), auto;
+    }
+
+    /* Optional: Also apply to buttons, links, etc. */
+    button,
+    a,
+    .pfp,
+    .overlay,
+    .song,
+    .button1,
+    .button2,
+    .links img {
+      cursor: url('/custom.cur'), auto;
+    }
 
     .name {
         margin-left: 10px;
